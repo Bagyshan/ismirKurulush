@@ -1,0 +1,133 @@
+version: '3.10'
+
+services:
+  backend:
+    build: ./
+    command: > # sh -c "daphne -b 0.0.0.0 -p 8000 config.asgi:application"
+      sh -c "gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2"
+    volumes:
+      - ./:/usr/src/app/
+      - static_volume:/usr/src/app/static
+      - media_volume:/usr/src/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - migration
+    networks:
+      - backend
+
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    
+  migration:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: on-failure
+    command: >
+      sh -c "python manage.py makemigrations --noinput && python manage.py migrate && python manage.py migrate django_celery_beat"
+    volumes:
+      - ./:/usr/src/app/
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  celery:
+    build: ./
+    restart: always
+    command: celery -A config worker -l info
+    volumes: 
+      - ./:/usr/src/app/
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - backend
+
+  celery-beat:
+    build: ./
+    restart: always
+    command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./:/usr/src/app/
+    depends_on:
+      - backend
+      - redis
+      - celery
+      - migration
+    networks:
+      - backend
+
+  flower:
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_URL_PREFIX=/flower
+    ports:
+      - "5555:5555"
+    volumes:
+      - flower_static:/usr/local/lib/python3.11/site-packages/flower/static
+    depends_on:
+      - redis
+      - celery
+    networks:
+      - backend
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: >
+      sh -c "redis-server --replicaof no one --rename-command REPLICAOF \"\" --rename-command SLAVEOF \"\""
+    networks:
+      - backend
+
+
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile.prod
+    container_name: "nginx"
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx-prod.conf:/etc/nginx/conf.d/nginx-prod.conf
+      - /etc/letsencrypt:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+      - static_volume:/usr/src/app/static
+      - media_volume:/usr/src/app/media
+      - flower_static:/usr/local/lib/python3.11/site-packages/flower/static
+    depends_on:
+      - backend
+      - flower
+    networks:
+      - backend
+
+
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  flower_static:
+
+networks:
+  backend:
