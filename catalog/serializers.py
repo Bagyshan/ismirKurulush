@@ -9,9 +9,22 @@ from .models import (
 )
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductImage
         fields = ['id', 'image', 'alt', 'order']
+
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        if not obj.image:
+            return None
+        if request:
+            return request.build_absolute_uri(obj.image.url)
+        # fallback если сериализатор используется без HTTP-контекста
+        from django.conf import settings
+        return f"{settings.SITE_DOMAIN}{obj.image.url}"
 
 # class CharacteristicSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -45,13 +58,22 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     def get_main_image(self, obj):
         img = obj.images.first()
-        return img.image.url if img else None
+        if not img or not img.image:
+            return None
+        
+        request = self.context.get("request")
+        if request:
+            return request.build_absolute_uri(img.image.url)
+
+        from django.conf import settings
+        return f"{settings.SITE_DOMAIN}{img.image.url}"
 
     def get_in_stock(self, obj):
         return obj.in_stock()
 
 class ProductDetailSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(many=True, read_only=True)
+    # images = ProductImageSerializer(many=True, read_only=True)
+    images = serializers.SerializerMethodField()
     # characteristics = CharacteristicSerializer(many=True, read_only=True)
     # reviews = ReviewSerializer(many=True, read_only=True)
     brand = BrandSerializer(read_only=True)
@@ -62,6 +84,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'  # можно ограничить
         read_only_fields = ['search_vector', 'popularity_score']
+
+    def get_images(self, obj):
+        return ProductImageSerializer(obj.images.all(), many=True, context=self.context).data
 
     def get_similar(self, obj):
         similar_products = obj.get_similar(limit=10)

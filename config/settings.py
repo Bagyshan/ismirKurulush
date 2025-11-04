@@ -229,7 +229,10 @@ AUTH_USER_MODEL = 'user.User'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_HOST = True
+
+SITE_DOMAIN = os.getenv('SITE_DOMAIN', "https://ismir-kurulush-backend.com.kg")
+
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
