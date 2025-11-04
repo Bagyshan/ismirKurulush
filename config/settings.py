@@ -227,7 +227,7 @@ redis_cache = Redis.from_url(REDIS_CACHE_URL)
 
 AUTH_USER_MODEL = 'user.User'
 
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # USE_X_FORWARDED_HOST = True
 
