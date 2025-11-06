@@ -26,11 +26,11 @@ def get_related_products(product_id: int):
     return data
 
 
-def get_product_details(product_slug: str, *, context=None):
+def get_product_details(product_id: str, *, context=None):
     """
     Достаём детальную карточку товара из кеша, иначе собираем, сериализуем и кешируем.
     """
-    cache_key = f"product_details:{product_slug}"
+    cache_key = f"product_details:{product_id}"
     data = cache.get(cache_key)
 
     if data is not None:
@@ -44,7 +44,7 @@ def get_product_details(product_slug: str, *, context=None):
         .prefetch_related("categories__children")  # если нужно иерархию тянуть
     )
 
-    product = get_object_or_404(product, slug=product_slug)
+    product = get_object_or_404(product, pk=product_id)
 
     serializer = ProductDetailSerializer(product, context=context)
     data = serializer.data

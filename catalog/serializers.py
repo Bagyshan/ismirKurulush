@@ -8,6 +8,18 @@ from .models import (
     Category
 )
 
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'slug']
+
+class BrandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brand
+        fields = ['id', 'name', 'slug']
+
+
 class ProductImageSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
@@ -54,7 +66,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id','name','slug','brand','categories','price','currency','main_image','in_stock','popularity_score']
+        fields = ['id','name','slug','brand','categories','price','currency','main_image','in_stock','popularity_score','created_at']
 
     def get_main_image(self, obj):
         img = obj.images.first()

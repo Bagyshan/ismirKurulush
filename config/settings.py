@@ -63,7 +63,8 @@ INSTALLED_APPS = [
 
     # apps
     'user',
-    'catalog'
+    'catalog',
+    'order'
 ]
 
 MIDDLEWARE = [
@@ -91,11 +92,67 @@ REST_FRAMEWORK = {
     ]
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=31),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',)
+}
+
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'IsmirKurulush API',
     'VERSION': '1.0.0',
 }
+# SPECTACULAR_SETTINGS = {
+#     'TITLE': 'API',
+#     'DESCRIPTION': '...',
+#     'VERSION': '1.0.0',
+#     'SECURITY': [
+#         {'SessionAuth': []},   # <--- главное
+#     ],
+#     'AUTHENTICATION_WHITELIST': [],
+#     'APPEND_COMPONENTS': {
+#         "securitySchemes": {
+#             "SessionAuth": {
+#                 "type": "apiKey",
+#                 "in": "header",
+#                 "name": "X-Session-ID",   # <-- имя заголовка, которое будет в Swagger
+#             }
+#         }
+#     },
+# }
+
+# SWAGGER_SETTINGS = {
+#     # Класс авто-схемы, который мы реализуем ниже
+#     'DEFAULT_AUTO_SCHEMA_CLASS': 'order.docs.custom_schema.CustomAutoSchema',
+#     'USE_SESSION_AUTH': False,
+#     # Добавляем security definition — это позволит вводить X-Session-Id через "Authorize" (опционально)
+#     'SECURITY_DEFINITIONS': {
+#         'SessionId': {
+#             'type': 'apiKey',
+#             'name': 'X-Session-Id',
+#             'in': 'header'
+#         }
+#     },
+#     # Если вы используете JWT:
+#     'SECURITY_DEFINITIONS': {
+#         'Bearer': {
+#             'type': 'apiKey',
+#             'name': 'Authorization',
+#             'in': 'header'
+#         },
+#         'SessionId': {
+#             'type': 'apiKey',
+#             'name': 'X-Session-Id',
+#             'in': 'header'
+#         }
+#     },
+# }
 
 ROOT_URLCONF = 'config.urls'
 
@@ -232,6 +289,12 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 
 SITE_DOMAIN = os.getenv('SITE_DOMAIN', "https://ismir-kurulush-backend.com.kg")
+
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'True') == 'True'
+
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'True') == 'True'
+
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True'
 
 
 CORS_ALLOWED_ORIGINS = [

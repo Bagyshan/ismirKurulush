@@ -5,10 +5,10 @@ from .models import Product
 from django_redis import get_redis_connection
 
 
-def invalidate_product_cache(product_slug: str):
+def invalidate_product_cache(product_id: str):
     r = get_redis_connection("default")
-    r.delete(f"product_details:{product_slug}")
+    r.delete(f"product_details:{product_id}")
 
 @receiver([post_save, post_delete], sender=Product)
 def product_changed(sender, instance, **kwargs):
-    invalidate_product_cache(instance.slug)
+    invalidate_product_cache(instance.pk)
