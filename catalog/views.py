@@ -66,13 +66,32 @@ class SortingOptionsView(APIView):
     Допустимые параметры сортировки.
     """
     SORTING_OPTIONS = {
-        "lowest_price": "price",
-        "highest_price": "-price",
-        "newest": "-created_at",
-        "oldest": "created_at",
-        "most_popular": "-popularity_score",
-        "least_popular": "popularity_score"
+        "lowest_price": {
+        "name": "Самая низкая цена",
+        "value": "price"
+        },
+        "highest_price": {
+        "name": "Самая высокая цена",
+        "value": "-price"
+        },
+        "newest": {
+        "name": "Новинки",
+        "value": "-created_at"
+        },
+        "oldest": {
+        "name": "Самые старые",
+        "value": "created_at"
+        },
+        "most_popular": {
+        "name": "Самые популярные",
+        "value": "-popularity_score"
+        },
+        "least_popular": {
+        "name": "Наименее популярные",
+        "value": "popularity_score"
+        }
     }
+
 
     def get(self, request):
         return Response(
