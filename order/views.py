@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.db import transaction
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.decorators import action, api_view, permission_classes
@@ -12,13 +12,13 @@ from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from .tasks import send_order_to_telegram
 
 from .models import Cart, CartItem, Product, OrderRequest
 from .serializers import (
     CartAddSerializer, CartRemoveSerializer, CartSerializer, CartItemSerializer, CartItemCreateSerializer, CartUpdateSerializer,
     OrderRequestSerializer
 )
-from .tasks import send_order_request_to_telegram
 
 session_header = openapi.Parameter(
     name='X-Session-Id',
@@ -252,24 +252,43 @@ class CartItemViewSet(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class OrderRequestCreateAPIView(APIView):
+
+
+
+
+
+class OrderRequestCreateView(generics.CreateAPIView):
+    queryset = OrderRequest.objects.all()
+    serializer_class = OrderRequestSerializer
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        serializer = OrderRequestSerializer(data=request.data)
+    def create(self, request, *args, **kwargs):
+        user = self.request.user if self.request.user.is_authenticated else None
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        order_request = serializer.save()
-
-        # Отправка в очередь Celery
-        send_order_request_to_telegram.delay(
-            name=order_request.name,
-            phone=order_request.phone,
-            comment=order_request.comment,
-            request_meta={
-                'ip': request.META.get('REMOTE_ADDR'),
-                'user': request.user.id if request.user.is_authenticated else None,
-            }
+        
+        # Сохраняем заявку
+        order = serializer.save(user=user)
+        
+        # Отправляем в Telegram канал через Celery
+        send_order_to_telegram.delay(order.id)
+        
+        return Response(
+            {
+                'status': 'success',
+                'message': 'Заявка успешно отправлена',
+                'data': serializer.data
+            },
+            status=status.HTTP_201_CREATED
         )
 
-        return Response({'status': 'accepted'}, status=status.HTTP_201_CREATED)
 
+class OrderRequestListByUserView(generics.ListAPIView):
+    queryset = OrderRequest.objects.all()
+    serializer_class = OrderRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset().filter(user=request.user)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

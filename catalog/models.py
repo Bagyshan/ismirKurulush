@@ -39,6 +39,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     search_vector = SearchVectorField(null=True, blank=True)  # для Postgres full-text (опционально)
     popularity_score = models.DecimalField(default=0.0, max_digits=10, decimal_places=1)  # computed field (views/purchases/ratings)
+    favorites_count = models.PositiveIntegerField(default=0)
 
     class Meta:
         indexes = [

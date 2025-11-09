@@ -1,41 +1,43 @@
 from celery import shared_task
 import requests
-from django.conf import settings
+from config import settings
+from .models import OrderRequest
+from telegram_bot.bot import TelegramNotifier
+import logging
 
-TELEGRAM_TOKEN = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
-TELEGRAM_CHAT_ID = getattr(settings, 'TELEGRAM_CHAT_ID', None)
+logger = logging.getLogger(__name__)
+
+# TELEGRAM_TOKEN = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
+# TELEGRAM_CHAT_ID = getattr(settings, 'TELEGRAM_CHAT_ID', None)
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=10)
-def send_order_request_to_telegram(self, name, phone, comment, request_meta=None):
-    """Отправляет сообщение о заявке в Telegram (через Bot API)
 
-    Важно: TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID должны быть в settings/prod env
+@shared_task(bind=True)  # Добавляем bind=True для правильной работы
+def send_order_to_telegram(self, order_id):
     """
-    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-        # логируем, но не падаем
-        return {'status': 'skipped', 'reason': 'no-telegram-config'}
-
-    text = (
-        f"📦 *Новая заявка*\n"
-        f"👤 Имя: {name}\n"
-        f"📞 Телефон: {phone}\n"
-        f"📝 Комментарий: {comment or '-'}\n"
-    )
-    if request_meta:
-        text += f"\n🔎 IP: {request_meta.get('ip')}\n"
-
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {
-        'chat_id': TELEGRAM_CHAT_ID,
-        'text': text,
-        'parse_mode': 'Markdown'
-    }
-
+    Задача для отправки заявки в Telegram канал
+    """
     try:
-        resp = requests.post(url, data=payload, timeout=10)
-        resp.raise_for_status()
-    except Exception as exc:
-        raise self.retry(exc=exc)
-
-    return {'status': 'sent'}
+        order = OrderRequest.objects.get(id=order_id)
+        notifier = TelegramNotifier()
+        
+        success = notifier.send_order_notification(order)
+        
+        if success:
+            # Помечаем как отправленное (опционально)
+            order.is_processed = True
+            order.save()
+            return f"Заявка {order_id} отправлена в Telegram канал"
+        else:
+            # Повторяем задачу через 30 секунд в случае ошибки
+            self.retry(countdown=30, max_retries=3)
+            return f"Ошибка отправки заявки {order_id}"
+            
+    except OrderRequest.DoesNotExist:
+        logger.error(f"Заявка {order_id} не найдена")
+        return f"Заявка {order_id} не найдена"
+    except Exception as e:
+        logger.error(f"Ошибка отправки заявки {order_id}: {str(e)}")
+        # Повторяем задачу через 30 секунд в случае ошибки
+        self.retry(countdown=30, max_retries=3)
+        return f"Ошибка отправки заявки {order_id}: {str(e)}"

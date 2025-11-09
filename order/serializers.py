@@ -88,6 +88,21 @@ class OrderRequestSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Phone is required')
         return value
     
+from rest_framework import serializers
+from .models import OrderRequest
+
+class OrderRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderRequest
+        fields = ['id', 'user', 'name', 'phone', 'comment', 'created_at', 'updated_at', 'is_processed']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'is_processed']
+
+    def validate_phone(self, value):
+        # Простая валидация: оставим гибкой. В продакшне рекомендую более строгую
+        if not value:
+            raise serializers.ValidationError('Phone is required')
+        return value
+    
 
 
 

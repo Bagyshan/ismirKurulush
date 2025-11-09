@@ -35,9 +35,23 @@ class CartItem(models.Model):
     
 
 class OrderRequest(models.Model):
-    name = models.CharField(max_length=200)
-    phone = models.CharField(max_length=50)
-    comment = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(
+        User,
+        related_name='order_requests',
+        on_delete=models.CASCADE,
+        null=True, blank=True
+    )
+    name = models.CharField(max_length=200, verbose_name="Имя")
+    phone = models.CharField(max_length=50, verbose_name="Телефон")
+    comment = models.TextField(blank=True, verbose_name="Комментарий")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
+    is_processed = models.BooleanField(default=False, verbose_name="Обработано")
 
+    class Meta:
+        verbose_name = "Заявка"
+        verbose_name_plural = "Заявки"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Заявка от {self.name} ({self.phone})"
