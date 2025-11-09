@@ -94,7 +94,7 @@ from .models import OrderRequest
 class OrderRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderRequest
-        fields = ['id', 'user', 'name', 'phone', 'comment', 'created_at', 'updated_at', 'is_processed']
+        fields = ['id', 'name', 'phone', 'comment', 'created_at', 'updated_at', 'is_processed']
         read_only_fields = ['id', 'created_at', 'updated_at', 'is_processed']
 
     def validate_phone(self, value):
