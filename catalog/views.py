@@ -54,10 +54,12 @@ class ProductDetailView(generics.RetrieveAPIView):
 class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    pagination_class = None
 
 class BrandListView(generics.ListAPIView):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
+    pagination_class = None
 
 
 

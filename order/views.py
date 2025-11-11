@@ -287,6 +287,7 @@ class OrderRequestListByUserView(generics.ListAPIView):
     queryset = OrderRequest.objects.all()
     serializer_class = OrderRequestSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(user=request.user)
