@@ -34,14 +34,41 @@ class CartItem(models.Model):
         return Decimal(self.quantity) * self.product.price
     
 
+class OrderRequestType(models.Model):
+    name = models.CharField(max_length=200, unique=True, verbose_name="Название типа")
+
+    class Meta:
+        verbose_name = "Тип заявки"
+        verbose_name_plural = "Типы заявок"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class OrderRequest(models.Model):
     user = models.ForeignKey(
         User,
         related_name='order_requests',
         on_delete=models.CASCADE,
         null=True, blank=True
+    )    
+    request_type = models.ForeignKey(
+        OrderRequestType,
+        related_name='order_requests',
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="Тип заявки"
+    )
+    cart = models.ForeignKey(
+        Cart, 
+        related_name='order_requests', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        verbose_name="Корзина"
     )
     name = models.CharField(max_length=200, verbose_name="Имя")
+    email = models.EmailField(verbose_name="Email", null=True, blank=True)
     phone = models.CharField(max_length=50, verbose_name="Телефон")
     comment = models.TextField(blank=True, verbose_name="Комментарий")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")

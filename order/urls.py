@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import CartViewSet, CartItemViewSet, OrderRequestCreateView, OrderRequestListByUserView
+from .views import CartViewSet, CartItemViewSet, OrderRequestCreateView, OrderRequestListByUserView, OrderRequestTypeListView
 
 router = DefaultRouter()
 # подключаем наборы через basename и viewset actions
@@ -13,4 +13,6 @@ urlpatterns = [
     # path('order/request/', OrderRequestCreateAPIView.as_view(), name='order-request'),
     path('order-request/', OrderRequestCreateView.as_view(), name='order-create'),
     path('order-requests-by-user/', OrderRequestListByUserView.as_view(), name='order-requests-by-user'),
+
+    path('order-request-types-selector/', OrderRequestTypeListView.as_view(), name='order-request-types-selector'),
 ]

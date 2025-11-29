@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cart, CartItem
+from .models import Cart, CartItem, OrderRequest, OrderRequestType
 from catalog.serializers import ProductListSerializer
 
 # class CartItemSerializer(serializers.ModelSerializer):
@@ -77,10 +77,35 @@ class CartSerializer(serializers.ModelSerializer):
         return str(total)
 
 
+class OrderRequestTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderRequestType
+        fields = ['id', 'name']
+
+
 class OrderRequestSerializer(serializers.ModelSerializer):
+    # request_type = OrderRequestTypeSerializer(read_only=True)
+    # cart = CartSerializer()
+    request_type_detail = OrderRequestTypeSerializer(source='request_type', read_only=True)
+    cart_detail = CartSerializer(source='cart', read_only=True)
+
+    request_type = serializers.PrimaryKeyRelatedField(
+        queryset=OrderRequestType.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
+    cart = serializers.PrimaryKeyRelatedField(
+        queryset=Cart.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
+
+
     class Meta:
         model = OrderRequest
-        fields = ['id', 'name', 'phone', 'comment', 'created_at']
+        fields = ['id', 'name', 'request_type', 'request_type_detail', 'email', 'phone', 'comment', 'cart', 'cart_detail', 'created_at']
         read_only_fields = ['id', 'created_at']
 
     def validate_phone(self, value):
@@ -89,20 +114,20 @@ class OrderRequestSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Phone is required')
         return value
     
-from rest_framework import serializers
-from .models import OrderRequest
+# from rest_framework import serializers
+# from .models import OrderRequest
 
-class OrderRequestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderRequest
-        fields = ['id', 'name', 'phone', 'comment', 'created_at', 'updated_at', 'is_processed']
-        read_only_fields = ['id', 'created_at', 'updated_at', 'is_processed']
+# class OrderRequestSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = OrderRequest
+#         fields = ['id', 'name', 'phone', 'comment', 'created_at', 'updated_at', 'is_processed']
+#         read_only_fields = ['id', 'created_at', 'updated_at', 'is_processed']
 
-    def validate_phone(self, value):
-        # Простая валидация: оставим гибкой. В продакшне рекомендую более строгую
-        if not value:
-            raise serializers.ValidationError('Phone is required')
-        return value
+#     def validate_phone(self, value):
+#         # Простая валидация: оставим гибкой. В продакшне рекомендую более строгую
+#         if not value:
+#             raise serializers.ValidationError('Phone is required')
+#         return value
     
 
 

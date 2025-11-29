@@ -293,3 +293,14 @@ class OrderRequestListByUserView(generics.ListAPIView):
         queryset = self.get_queryset().filter(user=request.user)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+    
+
+
+from .models import OrderRequestType
+from .serializers import OrderRequestTypeSerializer
+
+class OrderRequestTypeListView(generics.ListAPIView):
+    queryset = OrderRequestType.objects.all()
+    serializer_class = OrderRequestTypeSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None

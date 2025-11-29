@@ -52,6 +52,7 @@ urlpatterns = [
     path('api/catalog/', include('catalog.urls')),
     path('api/order/', include('order.urls')),
     path('api/favourites/', include('favourites.urls')),
+    path('api/bid/', include('bid.urls')),
 
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

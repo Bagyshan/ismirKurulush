@@ -33,13 +33,46 @@ class TelegramNotifier:
             logger.error(f"Ошибка отправки в Telegram: {e}")
             return False
     
+#     def _format_message(self, order):
+#         space = ''
+#         """Форматирование сообщения"""
+#         return f"""
+# 📞 <b>Новая заявка!</b> #{order.id}
+# 🗂 <b>Тип заявки:</b> {order.request_type.name if order.request_type else 'Не указан'}
+
+# 👤 <b>Имя:</b> {order.name}
+# 📧 <b>Email:</b> <code>{order.email}</code>
+# 📱 <b>Телефон:</b> <code>{order.phone}</code>
+# 📝 <b>Комментарий:</b> {order.comment if order.comment else 'Не указан'}
+
+# 🛒 <b>Корзина:</b> {space if order.cart else 'Не указана'}
+# {''.join([f"   - {item.product.name} x{item.quantity} = {item.total_price}\n" for item in order.cart.items.all()]) if order.cart else ''}
+#    <b>Общая сумма:</b> {order.cart.total_amount if order.cart else 'Не указано'}
+# ⏰ <b>Время заявки:</b> {order.created_at.strftime('%d.%m.%Y %H:%M')}
+#         """
     def _format_message(self, order):
         """Форматирование сообщения"""
-        return f"""
-📞 <b>Новая заявка!</b> #{order.id}
 
-👤 <b>Имя:</b> {order.name}
-📱 <b>Телефон:</b> <code>{order.phone}</code>
-📝 <b>Комментарий:</b> {order.comment if order.comment else 'Не указан'}
-⏰ <b>Время заявки:</b> {order.created_at.strftime('%d.%m.%Y %H:%M')}
-        """
+        # отдельная сборка строк корзины
+        if order.cart:
+            cart_lines = [
+                f"   - {item.product.name} x{item.quantity} = {item.total_price}"
+                for item in order.cart.items.all()
+            ]
+            cart_text = "\n".join(cart_lines)
+            cart_total = order.cart.total_amount
+        else:
+            cart_text = "Не указана"
+            cart_total = "Не указано"
+
+        return (
+            "📞 <b>Новая заявка!</b> #" + str(order.id) + "\n"
+            f"🗂 <b>Тип заявки:</b> {order.request_type.name if order.request_type else 'Не указан'}\n\n"
+            f"👤 <b>Имя:</b> {order.name}\n"
+            f"📧 <b>Email:</b> <code>{order.email}</code>\n"
+            f"📱 <b>Телефон:</b> <code>{order.phone}</code>\n"
+            f"📝 <b>Комментарий:</b> {order.comment if order.comment else 'Не указан'}\n\n"
+            f"🛒 <b>Корзина:</b>\n{cart_text}\n"
+            f"   <b>Общая сумма:</b> {cart_total}\n"
+            f"⏰ <b>Время заявки:</b> {order.created_at.strftime('%d.%m.%Y %H:%M')}"
+        )

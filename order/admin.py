@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cart, CartItem, OrderRequest
+from .models import Cart, CartItem, OrderRequest, OrderRequestType
 
 # Register your models here.
 
@@ -21,3 +21,8 @@ class CartItemAdmin(admin.ModelAdmin):
 class OrderRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'phone', 'created_at')
     list_filter = ('created_at',)
+
+@admin.register(OrderRequestType)
+class OrderRequestTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    search_fields = ('name',)
