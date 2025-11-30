@@ -22,7 +22,7 @@ class OrderRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'phone', 'created_at')
     list_filter = ('created_at',)
 
-@admin.register(OrderRequestType)
-class OrderRequestTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
-    search_fields = ('name',)
+# @admin.register(OrderRequestType)
+# class OrderRequestTypeAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'name')
+#     search_fields = ('name',)

@@ -6,6 +6,7 @@ from django.db import models
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from catalog.models import Product
+from service.models import Service
 
 User = get_user_model()
 
@@ -53,19 +54,20 @@ class OrderRequest(models.Model):
         on_delete=models.CASCADE,
         null=True, blank=True
     )    
-    request_type = models.ForeignKey(
-        OrderRequestType,
-        related_name='order_requests',
-        on_delete=models.SET_NULL,
-        null=True,
-        verbose_name="Тип заявки"
-    )
+    request_type = models.CharField(max_length=200, verbose_name="Тип заявки", null=True, blank=True)
     cart = models.ForeignKey(
         Cart, 
         related_name='order_requests', 
         on_delete=models.SET_NULL, 
         null=True, 
         verbose_name="Корзина"
+    )
+    service = models.ForeignKey(
+        Service, 
+        related_name='order_requests', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        verbose_name="Услуга"
     )
     name = models.CharField(max_length=200, verbose_name="Имя")
     email = models.EmailField(verbose_name="Email", null=True, blank=True)

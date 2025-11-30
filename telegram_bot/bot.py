@@ -53,6 +53,15 @@ class TelegramNotifier:
     def _format_message(self, order):
         """Форматирование сообщения"""
 
+        if order.service:
+            service_text = (
+                f"🛠 <b>Услуга:</b> {order.service.name}\n"
+                f"   - Цена: {order.service.price} {order.service.unit_of_measurement}\n"
+                f"   - Срок: {order.service.term}\n\n"
+            )
+        else:
+            service_text = "🛠 <b>Услуга:</b> Не указана\n\n"
+
         # отдельная сборка строк корзины
         if order.cart:
             cart_lines = [
@@ -67,12 +76,13 @@ class TelegramNotifier:
 
         return (
             "📞 <b>Новая заявка!</b> #" + str(order.id) + "\n"
-            f"🗂 <b>Тип заявки:</b> {order.request_type.name if order.request_type else 'Не указан'}\n\n"
+            f"🗂 <b>Тип заявки:</b> {order.request_type if order.request_type else 'Не указан'}\n\n"
             f"👤 <b>Имя:</b> {order.name}\n"
             f"📧 <b>Email:</b> <code>{order.email}</code>\n"
             f"📱 <b>Телефон:</b> <code>{order.phone}</code>\n"
             f"📝 <b>Комментарий:</b> {order.comment if order.comment else 'Не указан'}\n\n"
             f"🛒 <b>Корзина:</b>\n{cart_text}\n"
-            f"   <b>Общая сумма:</b> {cart_total}\n"
+            f"   <b>Общая сумма корзины:</b> {cart_total}\n\n"
+            f"{service_text}"
             f"⏰ <b>Время заявки:</b> {order.created_at.strftime('%d.%m.%Y %H:%M')}"
         )

@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Cart, CartItem, OrderRequest, OrderRequestType
+from .models import Cart, CartItem, OrderRequest, OrderRequestType  
+from service.models import Service
 from catalog.serializers import ProductListSerializer
 
 # class CartItemSerializer(serializers.ModelSerializer):
@@ -82,21 +83,32 @@ class OrderRequestTypeSerializer(serializers.ModelSerializer):
         model = OrderRequestType
         fields = ['id', 'name']
 
+class ServiceRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['id', 'name', 'price', 'unit_of_measurement', 'term']
 
 class OrderRequestSerializer(serializers.ModelSerializer):
     # request_type = OrderRequestTypeSerializer(read_only=True)
     # cart = CartSerializer()
-    request_type_detail = OrderRequestTypeSerializer(source='request_type', read_only=True)
+    # request_type_detail = OrderRequestTypeSerializer(source='request_type', read_only=True)
     cart_detail = CartSerializer(source='cart', read_only=True)
+    service_detail = ServiceRequestSerializer(source='service', read_only=True)
 
-    request_type = serializers.PrimaryKeyRelatedField(
-        queryset=OrderRequestType.objects.all(),
+    # request_type = serializers.PrimaryKeyRelatedField(
+    #     queryset=OrderRequestType.objects.all(),
+    #     write_only=True,
+    #     required=False,
+    #     allow_null=True
+    # )
+    cart = serializers.PrimaryKeyRelatedField(
+        queryset=Cart.objects.all(),
         write_only=True,
         required=False,
         allow_null=True
     )
-    cart = serializers.PrimaryKeyRelatedField(
-        queryset=Cart.objects.all(),
+    service = serializers.PrimaryKeyRelatedField(
+        queryset=Service.objects.all(),
         write_only=True,
         required=False,
         allow_null=True
@@ -105,7 +117,7 @@ class OrderRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderRequest
-        fields = ['id', 'name', 'request_type', 'request_type_detail', 'email', 'phone', 'comment', 'cart', 'cart_detail', 'created_at']
+        fields = ['id', 'name', 'request_type', 'email', 'phone', 'comment', 'cart', 'cart_detail', 'service', 'service_detail', 'created_at']
         read_only_fields = ['id', 'created_at']
 
     def validate_phone(self, value):
