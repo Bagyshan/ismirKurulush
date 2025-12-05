@@ -14,18 +14,18 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'price', 'quantity', 'is_published', 'created_at', 'updated_at')
     list_filter = ('is_published', 'brand', 'categories')
     search_fields = ('name', 'description')
-    prepopulated_fields = {'slug': ('name',)}
+    # prepopulated_fields = {'slug': ('name',)}
     date_hierarchy = 'created_at'
     inlines = [ProductImageInline]
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'slug')
+    list_display = ('id', 'name')
     search_fields = ('name',)
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'slug', 'parent')
+    list_display = ('id', 'name', 'parent')
     search_fields = ('name',)
 
 @admin.register(ProductImage)

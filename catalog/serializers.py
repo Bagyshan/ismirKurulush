@@ -12,12 +12,12 @@ from .models import (
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug']
+        fields = ['id', 'name', 'parent']
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'name', 'slug']
+        fields = ['id', 'name', 'description']
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -51,12 +51,12 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug']
+        fields = ['id', 'name', 'parent']
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'name', 'slug']
+        fields = ['id', 'name', 'description']
 
 class ProductListSerializer(serializers.ModelSerializer):
     brand = BrandSerializer(read_only=True)
@@ -66,7 +66,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id','name','slug','brand','categories','price','currency','main_image','in_stock','popularity_score','created_at']
+        fields = ['id','name','brand','categories','price','currency','main_image','in_stock','popularity_score','created_at']
 
     def get_main_image(self, obj):
         img = obj.images.first()

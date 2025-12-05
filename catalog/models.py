@@ -7,7 +7,6 @@ from django.conf import settings
 
 class Brand(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    slug = models.SlugField(max_length=200, unique=True)
     description = models.TextField(blank=True)
 
     def __str__(self):
@@ -15,11 +14,27 @@ class Brand(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='children')
 
+    def get_descendants(self):
+        """
+        Возвращает список ID всех дочерних категорий (рекурсивно),
+        включая саму категорию.
+        """
+        ids = [self.id]
+        queue = [self]
+
+        while queue:
+            item = queue.pop(0)
+            children = list(item.children.all())
+            ids.extend([c.id for c in children])
+            queue.extend(children)
+
+        return ids
+
     class Meta:
-        verbose_name_plural = "categories"
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
 
     def __str__(self):
         return self.name
@@ -27,7 +42,6 @@ class Category(models.Model):
 class Product(models.Model):
     sku = models.CharField(max_length=64, unique=True, null=True, blank=True)
     name = models.CharField(max_length=400)
-    slug = models.SlugField(max_length=400, unique=True)
     brand = models.ForeignKey(Brand, null=True, blank=True, on_delete=models.SET_NULL, related_name='products')
     categories = models.ManyToManyField(Category, related_name='products', blank=True)
     description = models.TextField(blank=True)
