@@ -14,10 +14,26 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name', 'parent']
 
+
+class CategoryTreeSerializer(serializers.ModelSerializer):
+    subcategories = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'parent', 'subcategories']
+
+    def get_subcategories(self, obj):
+        children = obj.children.all()
+        return CategoryTreeSerializer(children, many=True).data
+
+
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'name', 'description']
+
+
+
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
