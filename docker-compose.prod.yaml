@@ -98,6 +98,24 @@ services:
       - backend
 
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "3000:80"
+    container_name: "frontend"
+    volumes:
+      - ./frontend/default.conf:/etc/nginx/conf.d/default.conf
+      - front_static_volume:/usr/src/app/static
+      - static_volume:/usr/src/app/static
+    depends_on:
+      - backend
+    networks:
+      - backend
+
+
 
   nginx:
     build:
@@ -110,6 +128,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx-prod.conf:/etc/nginx/conf.d/nginx-prod.conf
+      - nginx_frontend_static_volume:/usr/share/nginx/html
       - /etc/letsencrypt:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
       - static_volume:/usr/src/app/static
@@ -128,6 +147,8 @@ volumes:
   static_volume:
   media_volume:
   flower_static:
+  front_static_volume:
+  nginx_frontend_static_volume:
 
 networks:
   backend:
