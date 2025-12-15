@@ -17,22 +17,36 @@ class Cart(models.Model):
         on_delete=models.CASCADE,
         null=True, blank=True
     )
-    session_id = models.CharField(max_length=255, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    session_id = models.CharField(max_length=255, null=True, blank=True, verbose_name="ID сессии")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     @property
     def total_amount(self):
         return sum(item.total_price for item in self.items.all())
+    
+    def __str__(self):
+        return f"Корзина {self.id} пользователя {self.user.email if self.user else self.session_id}"
+    
+    class Meta:
+        verbose_name = "Корзина"
+        verbose_name_plural = "Корзины"
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
+    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE, verbose_name="Корзина")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Товар")
+    quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
 
     @property
     def total_price(self):
         return Decimal(self.quantity) * self.product.price
+    
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name} в корзине {self.cart.id}"
+    
+    class Meta:
+        verbose_name = "Элемент корзины"
+        verbose_name_plural = "Элементы корзины"
     
 
 class OrderRequestType(models.Model):
