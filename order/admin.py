@@ -17,10 +17,17 @@ class CartItemAdmin(admin.ModelAdmin):
     list_display = ('id', 'cart', 'product', 'quantity')
     search_fields = ('cart__session_id', 'product__name')
 
+
+class CartInline(admin.TabularInline):
+    model = Cart
+    extra = 1
+    inline_classes = [CartItemInline]
 @admin.register(OrderRequest)
 class OrderRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'phone', 'created_at')
     list_filter = ('created_at',)
+    inlines = [CartInline]
+    search_fields = ('name', 'phone')
 
 # @admin.register(OrderRequestType)
 # class OrderRequestTypeAdmin(admin.ModelAdmin):

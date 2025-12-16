@@ -292,7 +292,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 USE_X_FORWARDED_HOST = True
 
-SITE_DOMAIN = os.getenv('SITE_DOMAIN', "https://ismir-kurulush-backend.com.kg")
+SITE_DOMAIN = os.getenv('SITE_DOMAIN', "https://ismir-kurulush.kg")
 
 SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'True') == 'True'
 
