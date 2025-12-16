@@ -69,7 +69,7 @@ class OrderRequest(models.Model):
         null=True, blank=True
     )    
     request_type = models.CharField(max_length=200, verbose_name="Тип заявки", null=True, blank=True)
-    cart = models.OneToOneField(
+    cart = models.ForeignKey(
         Cart, 
         related_name='order_requests', 
         on_delete=models.SET_NULL, 
