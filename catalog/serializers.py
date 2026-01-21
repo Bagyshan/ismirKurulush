@@ -12,7 +12,7 @@ from .models import (
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'parent']
+        fields = ['id', 'name', 'image', 'parent']
 
 
 class CategoryTreeSerializer(serializers.ModelSerializer):
@@ -20,7 +20,7 @@ class CategoryTreeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'parent', 'subcategories']
+        fields = ['id', 'name', 'image', 'parent', 'subcategories']
 
     def get_subcategories(self, obj):
         children = obj.children.all()
@@ -67,7 +67,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'parent']
+        fields = ['id', 'name', 'image', 'parent']
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:

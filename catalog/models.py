@@ -19,6 +19,7 @@ class Brand(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=200, verbose_name="Название")
+    image = models.ImageField(upload_to='category_images/', null=True, blank=True, verbose_name="Изображение")
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='children', verbose_name="Родительская категория")
 
     def get_descendants(self):
